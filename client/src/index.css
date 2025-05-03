@@ -1,0 +1,107 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 20 14.3% 4.1%;
+  --muted: 60 4.8% 95.9%;
+  --muted-foreground: 25 5.3% 44.7%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 20 14.3% 4.1%;
+  --card: 0 0% 100%;
+  --card-foreground: 20 14.3% 4.1%;
+  --border: 20 5.9% 90%;
+  --input: 20 5.9% 90%;
+  --primary: 276 61% 58%;
+  --primary-foreground: 211 100% 99%;
+  --secondary: 328 76% 71%;
+  --secondary-foreground: 24 9.8% 10%;
+  --accent: 60 4.8% 95.9%;
+  --accent-foreground: 24 9.8% 10%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 60 9.1% 97.8%;
+  --ring: 20 14.3% 4.1%;
+  --radius: 0.5rem;
+
+  /* SPENGU Custom Colors */
+  --spengu-primary: 276 61% 58%;
+  --spengu-primary-light: 262 83% 63%;
+  --spengu-secondary: 328 76% 71%;
+  --spengu-dark: 222 47% 11%;
+  --spengu-surface: 217 33% 17%;
+  --spengu-surface-light: 215 25% 27%;
+  --spengu-text: 214 32% 91%;
+  --spengu-text-secondary: 213 15% 65%;
+  --spengu-success: 158 64% 40%;
+  --spengu-error: 0 84% 60%;
+  --spengu-warning: 35 92% 51%;
+}
+
+.dark {
+  --background: 222 47% 11%;
+  --foreground: 214 32% 91%;
+  --muted: 217 33% 17%;
+  --muted-foreground: 213 15% 65%;
+  --popover: 222 47% 11%;
+  --popover-foreground: 214 32% 91%;
+  --card: 217 33% 17%;
+  --card-foreground: 214 32% 91%;
+  --border: 215 25% 27%;
+  --input: 215 25% 27%;
+  --primary: 276 61% 58%;
+  --primary-foreground: 214 32% 91%;
+  --secondary: 328 76% 71%;
+  --secondary-foreground: 214 32% 91%;
+  --accent: 217 33% 17%;
+  --accent-foreground: 214 32% 91%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 214 32% 91%;
+  --ring: 215 25% 27%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans text-foreground bg-background antialiased;
+    background-color: hsl(var(--spengu-dark));
+    background-image: 
+      radial-gradient(circle at 10% 20%, rgba(124, 58, 237, 0.1) 0%, transparent 20%),
+      radial-gradient(circle at 90% 80%, rgba(244, 114, 182, 0.1) 0%, transparent 20%);
+    min-height: 100vh;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold;
+  }
+}
+
+@layer components {
+  .card-glass {
+    @apply bg-opacity-70 backdrop-blur-md border border-border/5 transition-all duration-300;
+    background: rgba(30, 41, 59, 0.7);
+  }
+  
+  .card-glass:hover {
+    @apply transform -translate-y-1 shadow-lg;
+    box-shadow: 0 12px 20px -10px rgba(124, 58, 237, 0.3);
+  }
+  
+  .truncate-address {
+    @apply inline-block whitespace-nowrap overflow-hidden text-ellipsis max-w-[120px] md:max-w-[200px];
+  }
+  
+  .loading-skeleton {
+    @apply animate-pulse bg-spengu-surface;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(to right, hsl(var(--spengu-primary)), hsl(var(--spengu-secondary)));
+  }
+}
