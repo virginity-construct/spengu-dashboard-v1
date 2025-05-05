@@ -1,47 +1,51 @@
 # SPENGU Staking Dashboard
 
-A clean, minimal Solana-based staking dashboard for SPENGU tokens with Phantom wallet integration. Built with React, TypeScript, and TailwindCSS.
+![SPENGU Staking Dashboard](https://i.imgur.com/LRzrIOp.png)
 
-## Project Overview
+A minimal Solana staking dashboard built for the $SPENGU token and Pepenguins NFT project. This dashboard provides a sleek interface for users to connect their wallets, view their staking positions, and interact with the SPENGU ecosystem.
 
-The SPENGU Staking Dashboard is a modern, responsive web application that allows users to stake and manage their SPENGU tokens and NFTs on the Solana blockchain. The dashboard provides a clean interface for users to:
-
-- Connect their Phantom wallet
-- View their SOL balance and SPENGU token balance
-- Stake NFTs and SPENGU tokens
-- Track rewards and yields
-- Claim staking rewards
+**Live site:** [https://z3r0l4g.dev](https://z3r0l4g.dev)  
+**Repo:** [https://github.com/virginity-construct/spengu-dashboard-v1](https://github.com/virginity-construct/spengu-dashboard-v1)
 
 ## Features
 
-- **Wallet Integration**: Connect with Phantom wallet to access Solana blockchain
-- **NFT Staking**: Stake SPENGU NFTs to earn daily rewards
-- **Token Staking**: Stake SPENGU tokens with different APR options
-- **Rewards Dashboard**: View estimated yields and claimable rewards
-- **Asset Management**: Easily track and manage all staked assets
-- **Dark Mode**: Clean, modern dark-themed UI with custom design
+- **Wallet Integration** - Seamless connection with Phantom wallet
+- **NFT Staking** - View and manage staked Pepenguins NFTs
+- **Token Staking** - Stake $SPENGU tokens with flexible lock periods
+- **Rewards Dashboard** - Track daily yields and claimable rewards
+- **Real-time Stats** - Monitor APR and projected earnings
+- **Responsive Design** - Optimized for mobile, tablet, and desktop
+- **Dark Mode** - Sleek, eye-friendly dark theme
 
 ## Tech Stack
 
-- React 18 with TypeScript
-- TailwindCSS for styling
-- Solana Web3.js for blockchain interaction
-- Vite for fast development and production builds
-- Express.js for backend API
+- **Frontend**
+  - React 18 with TypeScript
+  - TailwindCSS + shadcn/ui components
+  - Framer Motion for animations
+  
+- **Blockchain Integration**
+  - @solana/web3.js for Solana interactions
+  - Phantom wallet adapter
 
-## Installation and Setup
+- **Developer Experience**
+  - Vite for fast builds and HMR
+  - ESLint + TypeScript for code quality
+  - React Query for data fetching
+
+## Installation
 
 ### Prerequisites
 
-- Node.js v18+ and npm
+- Node.js 18+ and npm
 - Git
 
-### Setup Steps
+### Setup
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/spengu-dashboard.git
-   cd spengu-dashboard
+   git clone https://github.com/virginity-construct/spengu-dashboard-v1.git
+   cd spengu-dashboard-v1
    ```
 
 2. Install dependencies:
@@ -54,39 +58,67 @@ The SPENGU Staking Dashboard is a modern, responsive web application that allows
    npm run dev
    ```
 
-4. The application will be available at `http://localhost:5000`
+4. The app will be available at http://localhost:5000
 
-## Integrating Staking Endpoints
+## Development Guide
 
-To integrate with real Solana staking contracts:
+### Project Structure
 
-1. Update the `nft-service.ts` file in `client/src/services/` with your contract addresses and ABI.
+```
+├── client/
+│   ├── src/
+│   │   ├── components/      # UI components
+│   │   ├── contexts/        # React contexts (wallet, theme)
+│   │   ├── hooks/           # Custom React hooks
+│   │   ├── lib/             # Utility functions
+│   │   ├── pages/           # Page components
+│   │   ├── services/        # API services
+│   │   ├── App.tsx          # Main App component
+│   │   └── main.tsx         # Entry point
+│   └── index.html           # HTML template
+├── server/                  # Express server for API endpoints
+├── shared/                  # Shared types and schemas
+└── ...
+```
 
-2. Replace the mock functions in the service with real contract calls:
-   ```typescript
-   // Example of updating the getStakedNFTs function
-   async getStakedNFTs(walletAddress: string): Promise<StakedNft[]> {
-     // Replace with your contract interaction code
-     const connection = new Connection(clusterApiUrl('mainnet-beta'));
-     const publicKey = new PublicKey(walletAddress);
-     
-     // Call your staking contract
-     const stakingProgramId = new PublicKey('YOUR_PROGRAM_ID');
-     
-     // Fetch user's staked NFTs
-     // ... your implementation here
-     
-     return nfts;
-   }
-   ```
+### Integrating with Real Contracts
 
-3. Update the token staking functions similarly to connect to your token staking contract.
+To connect the dashboard to real Solana contracts:
 
-4. Implement the claim and unstake functionality in the dashboard UI components.
+1. Update the `nft-service.ts` file in `client/src/services/` with your contract addresses and ABIs
+2. Replace the mock functions with real contract interactions
+3. Implement the claim and unstake functionality in the dashboard components
+
+Example integration:
+
+```typescript
+// Example contract integration (nft-service.ts)
+export class NFTStakingService {
+  // ... existing code
+
+  async getStakedNFTs(walletAddress: string): Promise<StakedNft[]> {
+    // Replace with your contract interaction code
+    const connection = new Connection(clusterApiUrl('mainnet-beta'));
+    const publicKey = new PublicKey(walletAddress);
+    
+    // Call your staking contract
+    const stakingProgramId = new PublicKey('YOUR_PROGRAM_ID');
+    
+    // Fetch user's staked NFTs
+    // ... your implementation here
+    
+    return nfts;
+  }
+}
+```
+
+### Customization
+
+- **Theme**: Modify the theme variables in `client/src/index.css`
+- **UI Components**: Extend or customize components in the `client/src/components/ui` directory
+- **API Endpoints**: Add new endpoints in `server/routes.ts`
 
 ## Deployment
-
-The application can be deployed to any static hosting service:
 
 1. Build the production version:
    ```bash
@@ -99,6 +131,15 @@ The application can be deployed to any static hosting service:
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
+## Contact
+
+For questions or collaboration opportunities:
+- Telegram: [@vicecode](https://t.me/vicecode)
+
 ## License
 
 This project is open source and available under the [MIT License](LICENSE).
+
+---
+
+> "Built before the fork. Deployed after the hype." — 🐧
