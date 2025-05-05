@@ -8,25 +8,30 @@ import { StakedNft, StakedToken } from '@/services/nft-service';
 type AssetType = 'all' | 'nfts' | 'tokens';
 
 export default function StakedAssets() {
+  // Always keep hooks in the same order
+  const [activeTab, setActiveTab] = useState<AssetType>('all');
   const { connected } = useWallet();
   const { stakedNfts, stakedTokens, isLoading } = useStakingData();
-  const [activeTab, setActiveTab] = useState<AssetType>('all');
+  
+  // Guard early against null/undefined values
+  const safeNfts = Array.isArray(stakedNfts) ? stakedNfts : [];
+  const safeTokens = Array.isArray(stakedTokens) ? stakedTokens : [];
+  
+  // Filter assets based on active tab - using safe arrays
+  const filteredNfts = useMemo(() => {
+    if (activeTab === 'all' || activeTab === 'nfts') return safeNfts;
+    return [];
+  }, [activeTab, safeNfts]);
+  
+  const filteredTokens = useMemo(() => {
+    if (activeTab === 'all' || activeTab === 'tokens') return safeTokens;
+    return [];
+  }, [activeTab, safeTokens]);
+  
+  const hasStakedAssets = filteredNfts.length > 0 || filteredTokens.length > 0;
   
   // Don't show assets section if wallet is not connected
   if (!connected) return null;
-  
-  // Filter assets based on active tab
-  const filteredNfts = useMemo(() => {
-    if (activeTab === 'all' || activeTab === 'nfts') return stakedNfts;
-    return [];
-  }, [activeTab, stakedNfts]);
-  
-  const filteredTokens = useMemo(() => {
-    if (activeTab === 'all' || activeTab === 'tokens') return stakedTokens;
-    return [];
-  }, [activeTab, stakedTokens]);
-  
-  const hasStakedAssets = filteredNfts.length > 0 || filteredTokens.length > 0;
   
   return (
     <section className="mb-8">

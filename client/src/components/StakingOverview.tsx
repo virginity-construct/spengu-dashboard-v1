@@ -8,18 +8,22 @@ import { useToast } from '@/hooks/use-toast';
 import { useStakingData } from '@/hooks/useStakingData';
 
 export default function StakingOverview() {
+  // Always keep the same order of hooks in every render
+  const [isClaimingRewards, setIsClaimingRewards] = useState(false);
   const { connected } = useWallet();
   const { toast } = useToast();
   const { stats, isLoading: isLoadingData } = useStakingData();
-  const [isClaimingRewards, setIsClaimingRewards] = useState(false);
   
-  // Calculate the staking percentage
-  const totalNfts = stats.totalNftsStaked + 5; // Assuming 5 more NFTs are available to stake
-  const nftStakedPercentage = totalNfts > 0 ? (stats.totalNftsStaked / totalNfts) * 100 : 0;
+  // Calculate the staking percentage - safe access to stats properties
+  const totalNftsStaked = stats?.totalNftsStaked || 0;
+  const totalNfts = totalNftsStaked + 5; // Assuming 5 more NFTs are available to stake
+  const nftStakedPercentage = totalNfts > 0 ? (totalNftsStaked / totalNfts) * 100 : 0;
   
-  // Calculate APR
-  const apr = stats.totalTokensStaked > 0 
-    ? ((stats.dailyYield * 365) / stats.totalTokensStaked) * 100 
+  // Calculate APR - safely access stats properties
+  const dailyYield = stats?.dailyYield || 0;
+  const totalTokensStaked = stats?.totalTokensStaked || 0;
+  const apr = totalTokensStaked > 0 
+    ? ((dailyYield * 365) / totalTokensStaked) * 100 
     : 0;
   
   const handleRefresh = () => {
@@ -32,7 +36,10 @@ export default function StakingOverview() {
   };
   
   const handleClaimRewards = async () => {
-    if (isClaimingRewards || stats.claimableRewards <= 0) return;
+    // Safely access stats properties
+    const claimableRewards = stats?.claimableRewards || 0;
+    
+    if (isClaimingRewards || claimableRewards <= 0) return;
     
     try {
       setIsClaimingRewards(true);
@@ -80,7 +87,7 @@ export default function StakingOverview() {
           </div>
           <div className="flex items-baseline">
             <span className="text-3xl font-semibold">
-              {isLoadingData ? <Loader2 className="h-6 w-6 animate-spin" /> : (connected ? stats.totalNftsStaked : '-')}
+              {isLoadingData ? <Loader2 className="h-6 w-6 animate-spin" /> : (connected ? stats?.totalNftsStaked || 0 : '-')}
             </span>
             <span className="ml-2 text-xs text-[hsl(var(--spengu-text-secondary))]">
               {connected ? `/${totalNfts} total` : 'Connect wallet'}
@@ -107,7 +114,7 @@ export default function StakingOverview() {
           </div>
           <div className="flex items-baseline">
             <span className="text-3xl font-semibold">
-              {isLoadingData ? <Loader2 className="h-6 w-6 animate-spin" /> : (connected ? stats.totalTokensStaked.toLocaleString() : '-')}
+              {isLoadingData ? <Loader2 className="h-6 w-6 animate-spin" /> : (connected ? (stats?.totalTokensStaked || 0).toLocaleString() : '-')}
             </span>
             <span className="ml-2 text-xs text-[hsl(var(--spengu-text-secondary))]">tokens</span>
           </div>
@@ -131,7 +138,7 @@ export default function StakingOverview() {
           </div>
           <div className="flex items-baseline">
             <span className="text-3xl font-semibold">
-              {isLoadingData ? <Loader2 className="h-6 w-6 animate-spin" /> : (connected ? stats.dailyYield : '-')}
+              {isLoadingData ? <Loader2 className="h-6 w-6 animate-spin" /> : (connected ? stats?.dailyYield || 0 : '-')}
             </span>
             <span className="ml-2 text-xs text-[hsl(var(--spengu-text-secondary))]">SPENGU per day</span>
           </div>
@@ -161,7 +168,7 @@ export default function StakingOverview() {
             <div className="mt-4">
               <Button 
                 onClick={handleClaimRewards}
-                disabled={stats.claimableRewards <= 0 || isClaimingRewards}
+                disabled={(stats?.claimableRewards || 0) <= 0 || isClaimingRewards}
                 className="w-full py-2 bg-gradient-to-r from-[hsl(var(--spengu-primary))] to-[hsl(var(--spengu-secondary))] hover:from-[hsl(var(--spengu-primary-light))] hover:to-[hsl(var(--spengu-secondary))] text-white rounded-lg font-medium transition-colors"
               >
                 {isClaimingRewards ? (

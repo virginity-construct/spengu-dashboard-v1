@@ -29,7 +29,11 @@ export function useWalletAdapter() {
   
   // Fetch mock SOL balance when wallet is connected
   useEffect(() => {
-    if (!publicKey || !connected) {
+    // Safely check connected state to avoid crashes
+    const isConnected = Boolean(connected);
+    const hasPublicKey = Boolean(publicKey);
+    
+    if (!hasPublicKey || !isConnected) {
       setSolBalance(0);
       return;
     }
@@ -40,8 +44,16 @@ export function useWalletAdapter() {
   
   // Load mock staking data when wallet is connected
   useEffect(() => {
-    if (connected) {
-      loadMockStakingData();
+    // Safely check connected state
+    const isConnected = Boolean(connected);
+    
+    if (isConnected) {
+      try {
+        loadMockStakingData();
+      } catch (error) {
+        console.error("Error loading staking data:", error);
+        resetData();
+      }
     } else {
       resetData();
     }
@@ -53,47 +65,62 @@ export function useWalletAdapter() {
     
     // Simulate API delay
     setTimeout(() => {
-      setSpenguBalance(14250);
-      setNftsStaked(12);
-      setTotalNfts(15);
-      setSpenguStaked(4500);
-      setDailyYield(37);
-      setApr(8.2);
-      setClaimableRewards(112);
-      
-      // Mock staked NFTs
-      setStakedNfts([
-        { id: '432', name: 'SPENGU #432', dailyReward: 3.5 },
-        { id: '156', name: 'SPENGU #156', dailyReward: 3.2 },
-        { id: '298', name: 'SPENGU #298', dailyReward: 2.8 },
-        { id: '512', name: 'SPENGU #512', dailyReward: 3.1 }
-      ]);
-      
-      setIsLoadingData(false);
+      try {
+        setSpenguBalance(14250);
+        setNftsStaked(12);
+        setTotalNfts(15);
+        setSpenguStaked(4500);
+        setDailyYield(37);
+        setApr(8.2);
+        setClaimableRewards(112);
+        
+        // Mock staked NFTs
+        setStakedNfts([
+          { id: '432', name: 'SPENGU #432', dailyReward: 3.5 },
+          { id: '156', name: 'SPENGU #156', dailyReward: 3.2 },
+          { id: '298', name: 'SPENGU #298', dailyReward: 2.8 },
+          { id: '512', name: 'SPENGU #512', dailyReward: 3.1 }
+        ]);
+      } catch (error) {
+        console.error("Error setting mock staking data:", error);
+      } finally {
+        setIsLoadingData(false);
+      }
     }, 1000);
   };
   
   // Reset data when wallet disconnects
   const resetData = () => {
-    setSpenguBalance(0);
-    setNftsStaked(0);
-    setTotalNfts(0);
-    setSpenguStaked(0);
-    setDailyYield(0);
-    setApr(0);
-    setClaimableRewards(0);
-    setStakedNfts([]);
+    try {
+      setSpenguBalance(0);
+      setNftsStaked(0);
+      setTotalNfts(0);
+      setSpenguStaked(0);
+      setDailyYield(0);
+      setApr(0);
+      setClaimableRewards(0);
+      setStakedNfts([]);
+    } catch (error) {
+      console.error("Error resetting data:", error);
+    }
   };
   
   // Refresh staking data
   const refreshData = () => {
-    if (!connected) return;
-    loadMockStakingData();
+    const isConnected = Boolean(connected);
+    if (!isConnected) return;
+    
+    try {
+      loadMockStakingData();
+    } catch (error) {
+      console.error("Error refreshing data:", error);
+    }
   };
   
   // Claim rewards - in a real app, this would call a contract method
   const claimRewards = async () => {
-    if (!connected || claimableRewards <= 0) return;
+    const isConnected = Boolean(connected);
+    if (!isConnected || claimableRewards <= 0) return;
     
     setIsClaimingRewards(true);
     
@@ -107,6 +134,7 @@ export function useWalletAdapter() {
           setIsClaimingRewards(false);
           resolve();
         } catch (error) {
+          console.error("Error claiming rewards:", error);
           setIsClaimingRewards(false);
           reject(new Error('Failed to claim rewards'));
         }
@@ -114,16 +142,17 @@ export function useWalletAdapter() {
     });
   };
   
+  // Return safe values regardless of connection state
   return {
-    solBalance: solBalance.toFixed(2),
-    spenguBalance,
-    nftsStaked,
-    totalNfts,
-    spenguStaked,
-    dailyYield,
-    apr,
-    claimableRewards,
-    stakedNfts,
+    solBalance: typeof solBalance === 'number' ? solBalance.toFixed(2) : "0.00",
+    spenguBalance: typeof spenguBalance === 'number' ? spenguBalance : 0,
+    nftsStaked: typeof nftsStaked === 'number' ? nftsStaked : 0,
+    totalNfts: typeof totalNfts === 'number' ? totalNfts : 0,
+    spenguStaked: typeof spenguStaked === 'number' ? spenguStaked : 0,
+    dailyYield: typeof dailyYield === 'number' ? dailyYield : 0,
+    apr: typeof apr === 'number' ? apr : 0,
+    claimableRewards: typeof claimableRewards === 'number' ? claimableRewards : 0,
+    stakedNfts: Array.isArray(stakedNfts) ? stakedNfts : [],
     isLoadingData,
     isClaimingRewards,
     refreshData,

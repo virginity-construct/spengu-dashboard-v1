@@ -14,6 +14,7 @@ export default function WalletStatusBar() {
   
   // Shorten the address for display
   const shortenAddress = (address: string) => {
+    if (!address) return '';
     return `${address.slice(0, 4)}...${address.slice(-4)}`;
   };
   
@@ -43,11 +44,31 @@ export default function WalletStatusBar() {
   
   // Handle disconnect
   const handleDisconnect = () => {
-    disconnect();
-    toast({
-      title: "Wallet disconnected",
-      description: "Your wallet has been disconnected",
-    });
+    if (typeof disconnect === 'function') {
+      disconnect();
+      toast({
+        title: "Wallet disconnected",
+        description: "Your wallet has been disconnected",
+      });
+    }
+  };
+  
+  // Safely format SOL balance
+  const formatSolBalance = () => {
+    if (isLoading) {
+      return (
+        <>
+          <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+          <span>Loading...</span>
+        </>
+      );
+    }
+    
+    if (typeof solBalance !== 'number') {
+      return '0.0000 SOL';
+    }
+    
+    return `${solBalance.toFixed(4)} SOL`;
   };
   
   return (
@@ -67,6 +88,7 @@ export default function WalletStatusBar() {
                 className={`ml-2 p-1 transition-colors ${isCopied ? 'text-[hsl(var(--spengu-success))]' : 'text-[hsl(var(--spengu-text-secondary))] hover:text-[hsl(var(--spengu-primary))]'}`} 
                 title="Copy address"
                 onClick={copyAddress}
+                disabled={!publicKey}
               >
                 <ClipboardCopy className="h-4 w-4" />
               </button>
@@ -76,24 +98,18 @@ export default function WalletStatusBar() {
             <div className="flex flex-col items-end">
               <span className="text-xs text-[hsl(var(--spengu-text-secondary))]">Balance</span>
               <span className="font-medium flex items-center">
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-                    <span>Loading...</span>
-                  </>
-                ) : (
-                  `${solBalance.toFixed(4)} SOL`
-                )}
+                {formatSolBalance()}
               </span>
             </div>
             <div className="flex flex-col items-end">
               <span className="text-xs text-[hsl(var(--spengu-text-secondary))]">$SPENGU</span>
-              <span className="font-medium">{spenguBalance.toLocaleString()}</span>
+              <span className="font-medium">{typeof spenguBalance === 'number' ? spenguBalance.toLocaleString() : '0'}</span>
             </div>
             <button 
               className="p-2 text-[hsl(var(--spengu-text-secondary))] hover:text-[hsl(var(--spengu-error))] transition-colors rounded" 
               title="Disconnect"
               onClick={handleDisconnect}
+              disabled={!publicKey}
             >
               <LogOut className="h-5 w-5" />
             </button>
