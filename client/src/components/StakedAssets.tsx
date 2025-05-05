@@ -1,6 +1,6 @@
 import { useWallet } from '../contexts/WalletContext';
 import { Card } from '@/components/ui/card';
-import { Eye, CheckCircle, FilterX, ArrowDownUp, Loader2 } from 'lucide-react';
+import { Eye, CheckCircle, FilterX, ArrowDownUp, Loader2, Coins } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import { useStakingData } from '@/hooks/useStakingData';
 import { StakedNft, StakedToken } from '@/services/nft-service';
