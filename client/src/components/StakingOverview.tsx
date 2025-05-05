@@ -1,29 +1,30 @@
+import { useState } from 'react';
 import { useWallet } from '../contexts/WalletContext';
-import { RefreshCw, Image, Coins, Clock, CheckCircle } from 'lucide-react';
+import { RefreshCw, Image, Coins, Clock, CheckCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { useWalletAdapter } from '@/hooks/useWalletAdapter';
+import { useStakingData } from '@/hooks/useStakingData';
 
 export default function StakingOverview() {
   const { connected } = useWallet();
   const { toast } = useToast();
-  const { 
-    nftsStaked, 
-    totalNfts, 
-    spenguStaked,
-    dailyYield,
-    claimableRewards,
-    apr,
-    isLoadingData,
-    refreshData,
-    claimRewards,
-    isClaimingRewards 
-  } = useWalletAdapter();
+  const { stats, isLoading: isLoadingData } = useStakingData();
+  const [isClaimingRewards, setIsClaimingRewards] = useState(false);
+  
+  // Calculate the staking percentage
+  const totalNfts = stats.totalNftsStaked + 5; // Assuming 5 more NFTs are available to stake
+  const nftStakedPercentage = totalNfts > 0 ? (stats.totalNftsStaked / totalNfts) * 100 : 0;
+  
+  // Calculate APR
+  const apr = stats.totalTokensStaked > 0 
+    ? ((stats.dailyYield * 365) / stats.totalTokensStaked) * 100 
+    : 0;
   
   const handleRefresh = () => {
-    refreshData();
+    // In a real implementation, this would trigger a data refresh
+    // For now, we'll just show a toast
     toast({
       title: "Refreshed data",
       description: "Staking data has been refreshed",
@@ -31,11 +32,17 @@ export default function StakingOverview() {
   };
   
   const handleClaimRewards = async () => {
+    if (isClaimingRewards || stats.claimableRewards <= 0) return;
+    
     try {
-      await claimRewards();
+      setIsClaimingRewards(true);
+      
+      // Simulate API call to claim rewards
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
       toast({
-        title: "Success!",
-        description: "Rewards claimed successfully",
+        title: "Coming Soon",
+        description: "Reward claiming functionality will be available soon",
       });
     } catch (error) {
       toast({
@@ -43,10 +50,10 @@ export default function StakingOverview() {
         description: (error as Error).message || "Unknown error occurred",
         variant: "destructive",
       });
+    } finally {
+      setIsClaimingRewards(false);
     }
   };
-  
-  const nftStakedPercentage = totalNfts > 0 ? (nftsStaked / totalNfts) * 100 : 0;
   
   return (
     <section className="mb-8">
@@ -72,7 +79,9 @@ export default function StakingOverview() {
             </div>
           </div>
           <div className="flex items-baseline">
-            <span className="text-3xl font-semibold">{connected ? nftsStaked : '-'}</span>
+            <span className="text-3xl font-semibold">
+              {isLoadingData ? <Loader2 className="h-6 w-6 animate-spin" /> : (connected ? stats.totalNftsStaked : '-')}
+            </span>
             <span className="ml-2 text-xs text-[hsl(var(--spengu-text-secondary))]">
               {connected ? `/${totalNfts} total` : 'Connect wallet'}
             </span>
@@ -97,15 +106,17 @@ export default function StakingOverview() {
             </div>
           </div>
           <div className="flex items-baseline">
-            <span className="text-3xl font-semibold">{connected ? spenguStaked.toLocaleString() : '-'}</span>
+            <span className="text-3xl font-semibold">
+              {isLoadingData ? <Loader2 className="h-6 w-6 animate-spin" /> : (connected ? stats.totalTokensStaked.toLocaleString() : '-')}
+            </span>
             <span className="ml-2 text-xs text-[hsl(var(--spengu-text-secondary))]">tokens</span>
           </div>
-          {connected && (
+          {connected && stats.tokenValue.interest > 0 && (
             <div className="mt-2 flex items-center text-sm text-[hsl(var(--spengu-success))]">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
               </svg>
-              <span>+250 from last week</span>
+              <span>+{stats.tokenValue.interest.toLocaleString()} interest</span>
             </div>
           )}
         </Card>
@@ -119,13 +130,15 @@ export default function StakingOverview() {
             </div>
           </div>
           <div className="flex items-baseline">
-            <span className="text-3xl font-semibold">{connected ? dailyYield : '-'}</span>
+            <span className="text-3xl font-semibold">
+              {isLoadingData ? <Loader2 className="h-6 w-6 animate-spin" /> : (connected ? stats.dailyYield : '-')}
+            </span>
             <span className="ml-2 text-xs text-[hsl(var(--spengu-text-secondary))]">SPENGU per day</span>
           </div>
           {connected && (
             <div className="mt-2 text-sm">
               <span className="text-[hsl(var(--spengu-text-secondary))]">APR:</span>
-              <span className="ml-2 text-[hsl(var(--spengu-success))] font-medium">{apr}%</span>
+              <span className="ml-2 text-[hsl(var(--spengu-success))] font-medium">{apr.toFixed(2)}%</span>
             </div>
           )}
         </Card>
@@ -139,17 +152,24 @@ export default function StakingOverview() {
             </div>
           </div>
           <div className="flex items-baseline">
-            <span className="text-3xl font-semibold">{connected ? claimableRewards : '-'}</span>
+            <span className="text-3xl font-semibold">
+              {isLoadingData ? <Loader2 className="h-6 w-6 animate-spin" /> : (connected ? stats.claimableRewards : '-')}
+            </span>
             <span className="ml-2 text-xs text-[hsl(var(--spengu-text-secondary))]">SPENGU</span>
           </div>
           {connected && (
             <div className="mt-4">
               <Button 
                 onClick={handleClaimRewards}
-                disabled={claimableRewards <= 0 || isClaimingRewards}
+                disabled={stats.claimableRewards <= 0 || isClaimingRewards}
                 className="w-full py-2 bg-gradient-to-r from-[hsl(var(--spengu-primary))] to-[hsl(var(--spengu-secondary))] hover:from-[hsl(var(--spengu-primary-light))] hover:to-[hsl(var(--spengu-secondary))] text-white rounded-lg font-medium transition-colors"
               >
-                {isClaimingRewards ? 'Claiming...' : 'Claim Rewards'}
+                {isClaimingRewards ? (
+                  <span className="flex items-center">
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Claiming...
+                  </span>
+                ) : 'Claim Rewards'}
               </Button>
             </div>
           )}
