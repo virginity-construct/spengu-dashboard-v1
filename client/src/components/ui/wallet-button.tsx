@@ -1,12 +1,13 @@
 import { useWallet } from '../../contexts/WalletContext';
 import { cn } from '@/lib/utils';
+import { Loader2 } from 'lucide-react';
 
 type WalletMultiButtonProps = {
   className?: string;
 };
 
 export function WalletMultiButton({ className }: WalletMultiButtonProps) {
-  const { connected, connect, disconnect, publicKey, walletName } = useWallet();
+  const { connected, connect, disconnect, publicKey, walletName, isLoading } = useWallet();
   
   // Format public key for display (first 4 chars + ... + last 4 chars)
   const formatPublicKey = (key: string) => {
@@ -14,18 +15,31 @@ export function WalletMultiButton({ className }: WalletMultiButtonProps) {
     return `${key.slice(0, 4)}...${key.slice(-4)}`;
   };
 
+  // Handle button click
+  const handleWalletAction = () => {
+    if (isLoading) return; // Prevent actions while loading
+    connected ? disconnect() : connect();
+  };
+
   return (
     <button
-      onClick={connected ? disconnect : connect}
+      onClick={handleWalletAction}
+      disabled={isLoading}
       className={cn(
         "px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2",
         connected 
           ? "bg-spengu-surface hover:bg-spengu-surface-light text-spengu-text" 
           : "bg-spengu-primary hover:bg-spengu-primary-light text-white",
+        isLoading && "opacity-70 cursor-not-allowed",
         className
       )}
     >
-      {connected ? (
+      {isLoading ? (
+        <>
+          <Loader2 className="h-4 w-4 animate-spin" />
+          <span>{connected ? "Disconnecting..." : "Connecting..."}</span>
+        </>
+      ) : connected ? (
         <>
           <WalletIcon />
           <span>{walletName}: {formatPublicKey(publicKey || '')}</span>

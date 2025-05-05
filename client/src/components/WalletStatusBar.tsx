@@ -2,11 +2,11 @@ import { useWallet } from '../contexts/WalletContext';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useWalletAdapter } from '@/hooks/useWalletAdapter';
-import { ClipboardCopy, LogOut } from 'lucide-react';
+import { ClipboardCopy, LogOut, Loader2 } from 'lucide-react';
 
 export default function WalletStatusBar() {
-  const { publicKey, disconnect } = useWallet();
-  const { solBalance, spenguBalance } = useWalletAdapter();
+  const { publicKey, disconnect, solBalance, isLoading } = useWallet();
+  const { spenguBalance } = useWalletAdapter();
   const { toast } = useToast();
   const [isCopied, setIsCopied] = useState(false);
   
@@ -75,7 +75,16 @@ export default function WalletStatusBar() {
           <div className="flex items-center gap-4">
             <div className="flex flex-col items-end">
               <span className="text-xs text-[hsl(var(--spengu-text-secondary))]">Balance</span>
-              <span className="font-medium">{solBalance} SOL</span>
+              <span className="font-medium flex items-center">
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                    <span>Loading...</span>
+                  </>
+                ) : (
+                  `${solBalance.toFixed(4)} SOL`
+                )}
+              </span>
             </div>
             <div className="flex flex-col items-end">
               <span className="text-xs text-[hsl(var(--spengu-text-secondary))]">$SPENGU</span>
